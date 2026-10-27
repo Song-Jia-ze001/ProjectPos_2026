@@ -59,6 +59,8 @@ public class POSFrame extends JFrame {
     private final JTextArea receiptArea = new JTextArea();
     private final JTabbedPane tabs = new JTabbedPane();
     private final JLabel modeLabel = new JLabel("PROCESS SALE");
+    private JPanel saleCatalogHost;
+    private JPanel returnCatalogHost;
 
     public POSFrame(Register register) {
         super("MiniMart POS  |  ProjectPos_2026");
@@ -163,8 +165,10 @@ public class POSFrame extends JFrame {
         });
         JPanel pay = footerBar("TOTAL", saleTotalLabel, cashField, payBtn);
 
-        JPanel catalog = buildCatalogPanel(true);
-        root = stacked(root, entry, new JScrollPane(table), catalog, pay);
+        saleCatalogHost = new JPanel(new BorderLayout());
+        saleCatalogHost.setOpaque(false);
+        saleCatalogHost.add(buildCatalogPanel(true), BorderLayout.CENTER);
+        root = stacked(root, entry, new JScrollPane(table), saleCatalogHost, pay);
         return root;
     }
 
@@ -206,8 +210,10 @@ public class POSFrame extends JFrame {
         });
         JPanel refund = footerBar("REFUND", returnTotalLabel, null, done);
 
-        JPanel catalog = buildCatalogPanel(false);
-        root = stacked(root, entry, new JScrollPane(table), catalog, refund);
+        returnCatalogHost = new JPanel(new BorderLayout());
+        returnCatalogHost.setOpaque(false);
+        returnCatalogHost.add(buildCatalogPanel(false), BorderLayout.CENTER);
+        root = stacked(root, entry, new JScrollPane(table), returnCatalogHost, refund);
         return root;
     }
 
@@ -220,6 +226,7 @@ public class POSFrame extends JFrame {
         for (final ProductDescription p : register.getCatalog().getAll()) {
             JButton b = new JButton("<html><center><b>" + p.getName() + "</b><br/>"
                     + "<span style='color:#666'>" + p.getItemId() + " &nbsp; $" + p.getPrice()
+                    + " &nbsp; 库存" + p.getStock()
                     + "</span></center></html>");
             b.setBackground(Color.WHITE);
             b.setFocusPainted(false);
@@ -288,6 +295,7 @@ public class POSFrame extends JFrame {
             itemIdField.setText("");
             qtyField.setText("1");
             itemIdField.requestFocus();
+            refreshCatalogButtons();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Enter Item", JOptionPane.WARNING_MESSAGE);
         }
@@ -323,6 +331,7 @@ public class POSFrame extends JFrame {
             returnTotalLabel.setText(register.getCurrentReturn().getTotal().toPlainString());
             returnItemField.setText("");
             returnQtyField.setText("1");
+            refreshCatalogButtons();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Return Item", JOptionPane.WARNING_MESSAGE);
         }
@@ -335,6 +344,7 @@ public class POSFrame extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Refund: " + register.getCurrentReturn().getRefundAmount().toPlainString(),
                     "Return complete", JOptionPane.INFORMATION_MESSAGE);
+            refreshCatalogButtons();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Return", JOptionPane.WARNING_MESSAGE);
         }
@@ -411,7 +421,19 @@ public class POSFrame extends JFrame {
     }
 
     private void refreshCatalogButtons() {
-        // 目录按钮在构造界面时已按当前商品目录生成
+        // 卖出或退货后库存变了，按钮上的数字跟着刷新
+        if (saleCatalogHost != null) {
+            saleCatalogHost.removeAll();
+            saleCatalogHost.add(buildCatalogPanel(true), BorderLayout.CENTER);
+            saleCatalogHost.revalidate();
+            saleCatalogHost.repaint();
+        }
+        if (returnCatalogHost != null) {
+            returnCatalogHost.removeAll();
+            returnCatalogHost.add(buildCatalogPanel(false), BorderLayout.CENTER);
+            returnCatalogHost.revalidate();
+            returnCatalogHost.repaint();
+        }
     }
 
     private static DefaultTableModel tableModel() {
