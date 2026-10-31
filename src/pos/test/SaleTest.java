@@ -20,6 +20,13 @@ public class SaleTest {
         register.endSale();
         register.makePayment(new BigDecimal("20.00"));
         assertEqual("11.00", sale.getBalance().toPlainString());
+
+        // 同一件商品点两次，应该合成一行
+        register.makeNewSale();
+        register.enterItem("1002", 1);
+        register.enterItem("1002", 2);
+        assertEqual("1", String.valueOf(register.getCurrentSale().getLineItems().size()));
+        assertEqual("6.60", register.getCurrentSale().getTotal().toPlainString());
         System.out.println("SaleTest passed.");
     }
 

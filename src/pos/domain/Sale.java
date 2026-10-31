@@ -36,6 +36,12 @@ public class Sale {
             throw new IllegalArgumentException("Quantity must be positive");
         }
         product.decreaseStock(quantity);
+        for (SalesLineItem existing : lineItems) {
+            if (existing.getProduct().getItemId().equals(product.getItemId())) {
+                existing.addQuantity(quantity);
+                return existing;
+            }
+        }
         SalesLineItem item = new SalesLineItem(product, quantity);
         lineItems.add(item);
         return item;

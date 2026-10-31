@@ -283,15 +283,8 @@ public class POSFrame extends JFrame {
         try {
             String id = itemIdField.getText().trim();
             int qty = Integer.parseInt(qtyField.getText().trim());
-            SalesLineItem item = register.enterItem(id, qty);
-            saleModel.addRow(new Object[] {
-                    item.getProduct().getItemId(),
-                    item.getProduct().getName(),
-                    item.getQuantity(),
-                    item.getProduct().getPrice(),
-                    item.getSubtotal()
-            });
-            saleTotalLabel.setText(register.getCurrentSale().getTotal().toPlainString());
+            register.enterItem(id, qty);
+            fillSaleTable();
             itemIdField.setText("");
             qtyField.setText("1");
             itemIdField.requestFocus();
